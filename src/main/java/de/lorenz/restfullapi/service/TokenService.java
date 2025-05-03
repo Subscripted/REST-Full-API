@@ -46,9 +46,6 @@ public class TokenService {
     public Optional<String> getValidToken(String email) {
         LocalDateTime now = LocalDateTime.now();
         return apiTokenRepository.findByEmailAndExpiresAtAfter(email, now)
-                .map(ApiToken::getToken); // nur Token-String zurückgeben
+                .map(ApiToken::getToken);
     }
-
-
-
 }

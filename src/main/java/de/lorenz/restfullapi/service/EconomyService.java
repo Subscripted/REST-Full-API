@@ -26,7 +26,6 @@ public class EconomyService {
     public Testtable setUserCoins(String uuid, int coins) {
         Testtable eco = economyRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         eco.setCoins(coins);
         return economyRepository.save(eco);
     }

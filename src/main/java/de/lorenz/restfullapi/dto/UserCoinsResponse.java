@@ -13,7 +13,6 @@ public class UserCoinsResponse {
         this.coins = coins;
     }
 
-    // was in der Json Wiedergegeben wird
     public String getUuid() { return uuid; }
     public int getCoins() { return coins; }
 }

@@ -4,51 +4,31 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "logincreds")
+@AllArgsConstructor
 public class LoginCreds {
 
+    @Getter
+    @Setter
     @Id
     @Column(name = "email", nullable = false)
     private String email;
 
+    @Getter
+    @Setter
     @Column(name = "client_id", nullable = false)
     private String clientId;
 
+    @Getter
+    @Setter
     @Column(name = "client_secret", nullable = false)
     private String clientSecret;
 
     public LoginCreds() {
-    }
-
-    public LoginCreds(String email, String clientId, String clientSecret) {
-        this.email = email;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
     }
 }

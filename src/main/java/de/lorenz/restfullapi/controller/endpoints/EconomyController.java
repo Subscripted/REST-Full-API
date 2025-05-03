@@ -1,5 +1,8 @@
 package de.lorenz.restfullapi.controller.endpoints;
 
+import de.lorenz.restfullapi.dto.SetCoinsRequest;
+import de.lorenz.restfullapi.dto.UserCoinsResponse;
+import de.lorenz.restfullapi.global.RESTPaths;
 import de.lorenz.restfullapi.service.EconomyService;
 import de.lorenz.restfullapi.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/economy")
+@RequestMapping(RESTPaths.ECONOMY)
 public class EconomyController {
 
     private final EconomyService economyService;
@@ -30,20 +33,18 @@ public class EconomyController {
     @GetMapping("/{uuid}/coins")
     public ResponseEntity<?> getUserCoins(@PathVariable String uuid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("Unauthorized");
+            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
         }
-        return ResponseEntity.ok(economyService.getUserCoins(uuid));
+        int coins = economyService.getUserCoins(uuid);
+        return ResponseEntity.ok(new UserCoinsResponse(uuid, coins));
     }
 
-
-    @PostMapping("/{uuid}/coins/{coins}")
-    public ResponseEntity<?> setUserCoins(@PathVariable String uuid, @PathVariable int coins,
-                                          @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    @PostMapping("/{uuid}/coins")
+    public ResponseEntity<?> setUserCoins(@PathVariable String uuid, @RequestHeader(value = "Authorization", required = false) String authHeader, @RequestBody SetCoinsRequest request) {
         if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("Unauthorized");
+            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
         }
-        return ResponseEntity.ok(economyService.setUserCoins(uuid, coins));
+        return ResponseEntity.ok(economyService.setUserCoins(uuid, request.getCoins()));
     }
-
 
 }

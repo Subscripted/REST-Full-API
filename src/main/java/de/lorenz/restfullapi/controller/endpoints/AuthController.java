@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,18 +38,18 @@ public class AuthController {
             return ResponseEntity.status(401).body("Ungültige Anmeldedaten");
         }
 
-        // ⏳ 1. Prüfen: Gibt es schon einen gültigen Token?
         Optional<String> existingToken = tokenService.getValidToken(tokenRequest.getEmail());
 
+        Map<String, String> response = new HashMap<>();
         if (existingToken.isPresent()) {
-            // ✔️ 2. Falls ja: einfach bestehenden Token zurückgeben
-            return ResponseEntity.ok(existingToken.get());
+            response.put("token", existingToken.get());
+            return ResponseEntity.ok(response);
         }
 
-        // 🛠️ 3. Falls nein: neuen Token erstellen
         String newToken = tokenService.generateToken(tokenRequest.getEmail());
+        response.put("token", newToken);
+        return ResponseEntity.ok(response);
 
-        return ResponseEntity.ok(newToken);
     }
 
 }
