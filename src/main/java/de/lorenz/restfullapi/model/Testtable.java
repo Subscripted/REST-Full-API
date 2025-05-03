@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import java.util.UUID;
 
 @Entity
-public class Economy {
+public class Testtable {
 
     @Id
     @Column(name = "uuid", nullable = false, length = 36)
@@ -15,10 +15,10 @@ public class Economy {
     @Column(nullable = false)
     private int coins;
 
-    public Economy() {
+    public Testtable() {
     }
 
-    public Economy(String uuid, int coins) {
+    public Testtable(String uuid, int coins) {
         this.uuid = uuid;
         this.coins = coins;
     }

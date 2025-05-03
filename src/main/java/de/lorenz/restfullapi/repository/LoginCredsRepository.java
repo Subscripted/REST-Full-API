@@ -1,0 +1,12 @@
+package de.lorenz.restfullapi.repository;
+
+import de.lorenz.restfullapi.model.LoginCreds;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface LoginCredsRepository extends JpaRepository<LoginCreds, Long> {
+
+    Optional<LoginCreds> findByEmailAndClientIdAndClientSecret(String email, String clientId, String clientSecret);
+
+}
