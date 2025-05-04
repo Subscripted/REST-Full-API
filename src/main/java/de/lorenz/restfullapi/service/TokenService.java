@@ -19,8 +19,10 @@ public class TokenService {
         this.apiTokenRepository = apiTokenRepository;
     }
 
+    private static final String TOKEN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
     public String generateToken(String email) {
-        String tokenValue = UUID.randomUUID().toString();
+        String tokenValue = randomToken(32);
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
         ApiToken token = new ApiToken();
         token.setEmail(email);
@@ -30,6 +32,16 @@ public class TokenService {
         apiTokenRepository.save(token);
         return tokenValue;
     }
+
+    private String randomToken(int length) {
+        StringBuilder token = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * TOKEN_CHARS.length());
+            token.append(TOKEN_CHARS.charAt(index));
+        }
+        return token.toString();
+    }
+
 
     public boolean isTokenValid(String tokenValue) {
         return apiTokenRepository.findByToken(tokenValue)

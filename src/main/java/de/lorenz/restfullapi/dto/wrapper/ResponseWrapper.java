@@ -1,4 +1,4 @@
-package de.lorenz.restfullapi.dto;
+package de.lorenz.restfullapi.dto.wrapper;
 
 import java.util.Collection;
 
