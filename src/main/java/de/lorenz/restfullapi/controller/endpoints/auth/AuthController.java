@@ -1,4 +1,4 @@
-package de.lorenz.restfullapi.controller.endpoints;
+package de.lorenz.restfullapi.controller.endpoints.auth;
 
 import de.lorenz.restfullapi.dto.TokenRequest;
 import de.lorenz.restfullapi.model.LoginCreds;
