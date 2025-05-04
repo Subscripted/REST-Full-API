@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<UserData, String> {
     // allen Daten erwarte ist diese Methode vorerst nicht zu gebrauchen
 
     List<UserData> getSpielerdatenByUuid(String uuid);
+    List<UserData> getSpielerdatenByName(String name);
+    List<UserData> getSpielerdatenByIp(String ip);
 }

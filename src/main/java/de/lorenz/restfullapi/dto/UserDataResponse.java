@@ -9,12 +9,18 @@ public class UserDataResponse {
     @Getter
     private String uuid;
     @Getter
-    private int coins;
+    private String name;
     @Getter
     private String ip;
     @Getter
-    private String name;
+    private boolean verified;
     @Getter
-    private long playtime;
+    private String discord_userid;
+    @Getter
+    private String verified_date;
+    @Getter
+    private long spielzeit;
+    @Getter
+    private int coins;
 
 }

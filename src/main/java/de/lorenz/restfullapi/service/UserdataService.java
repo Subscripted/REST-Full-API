@@ -19,6 +19,13 @@ public class UserdataService {
         return repository.getSpielerdatenByUuid(uuid);
     }
 
+    public List<UserData> getDatenByName(String name) {
+        return repository.getSpielerdatenByName(name);
+    }
+    public List<UserData> getDatenByIp(String ip) {
+        return repository.getSpielerdatenByIp(ip);
+    }
+
     /**
      public boolean updateNameByUuid(String uuid, String name) {
      Optional<UserData> optionalData = repository.findByUuid(uuid);

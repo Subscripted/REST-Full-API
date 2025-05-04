@@ -35,7 +35,7 @@ public class AuthController {
         );
 
         if (creds.isEmpty()) {
-            return ResponseEntity.status(401).body("Ungültige Anmeldedaten");
+            return ResponseEntity.status(401).body("Wrong Login Credentials");
         }
 
         Optional<String> existingToken = tokenService.getValidToken(tokenRequest.getEmail());

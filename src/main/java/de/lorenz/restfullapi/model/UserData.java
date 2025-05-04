@@ -24,20 +24,37 @@ public class UserData {
     @Column(nullable = false)
     @Getter
     @Setter
-    private String ip;
-
-    @Column(nullable = false)
-    @Getter
-    @Setter
     private String name;
 
     @Column(nullable = false)
     @Getter
     @Setter
-    private int playtime;
+    private String ip;
+
+    @Column(nullable = false)
+    @Getter
+    @Setter
+    private boolean verified;
+
+    @Column(nullable = false)
+    @Getter
+    @Setter
+    private String discord_userid;
+
+    @Column(nullable = false)
+    @Getter
+    @Setter
+    private String verified_date;
+
+    @Column(nullable = false)
+    @Getter
+    @Setter
+    private int spielzeit;
 
     @Column(nullable = false)
     @Getter
     @Setter
     private int coins;
+
+
 }
