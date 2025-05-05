@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 
-public record Chat(String message, Long senderId, String username, String rank, LocalDateTime time){}
+public record Chat(Long chatId, Long messageId, String message, Long senderId, String username, String rank, LocalDateTime time) {}
 
 
 

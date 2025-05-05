@@ -1,6 +1,7 @@
 package de.lorenz.restfullapi.controller.endpoints.forum;
 
 import de.lorenz.restfullapi.dto.Chat;
+import de.lorenz.restfullapi.model.ChatMessage;
 import de.lorenz.restfullapi.repository.ForumChatMessageRepository;
 import de.lorenz.restfullapi.service.TokenService;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,8 @@ public class ChatController {
         List<Chat> chats = forumChatMessageRepository.findByAntrag_AntragsIdOrderByTimeAsc(antragsId)
                 .stream()
                 .map(chat -> new Chat(
+                        chat.getChatId(),
+                        chat.getMessageId(),
                         chat.getMessage(),
                         chat.getSender().getUserId(),
                         chat.getSender().getUsername(),
@@ -52,5 +55,34 @@ public class ChatController {
         return ResponseEntity.ok(chats);
     }
 
+    @GetMapping("/report/{chatid}/{messageid}")
+    public ResponseEntity<?> report(
+            @PathVariable Long chatid,
+            @PathVariable Long messageid,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+        if (!isAuthorized(authHeader)) {
+            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
+        }
+
+        ChatMessage chatMessage = forumChatMessageRepository.findById(chatid).orElse(null);
+
+        if (chatMessage == null) {
+            return ResponseEntity.status(404).body("{\"error\": \"Chat-Nachricht nicht gefunden\"}");
+        }
+
+        if (chatMessage.getMessageId() == null || !chatMessage.getMessageId().equals(messageid)) {
+            return ResponseEntity.status(400).body("{\"error\": \"Message-ID stimmt nicht überein\"}");
+        }
+
+        if (Boolean.TRUE.equals(chatMessage.getReported())) {
+            return ResponseEntity.status(400).body("{\"error\": \"Nachricht wurde bereits gemeldet\"}");
+        }
+
+        chatMessage.setReported(true);
+        forumChatMessageRepository.save(chatMessage);
+
+        return ResponseEntity.ok("{\"success\": \"Nachricht wurde gemeldet\"}");
+    }
 }
 
