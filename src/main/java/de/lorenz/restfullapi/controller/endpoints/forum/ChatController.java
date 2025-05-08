@@ -1,7 +1,10 @@
 package de.lorenz.restfullapi.controller.endpoints.forum;
 
+import de.lorenz.restfullapi.dto.AntragOverview;
 import de.lorenz.restfullapi.dto.Chat;
+import de.lorenz.restfullapi.dto.CreateAntragRequest;
 import de.lorenz.restfullapi.dto.CreateChatMessageRequest;
+import de.lorenz.restfullapi.model.Antrag;
 import de.lorenz.restfullapi.model.ChatMessage;
 import de.lorenz.restfullapi.repository.AntragRepository;
 import de.lorenz.restfullapi.repository.ForumChatMessageRepository;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -34,9 +38,67 @@ public class ChatController {
         return false;
     }
 
+    /**
+     * Erstellt einen neuen Antrag (Chat-Thread).
+     * <p>
+     * Benötigt:
+     * - Authorization Header: Bearer {token}
+     * - Body (JSON):
+     * {
+     * "userId": Long // ID des Users, der den Antrag stellt
+     * }
+     * <p>
+     * Antwort:
+     * - antragsId (Long)
+     * - message (String)
+     */
+    @PostMapping("/new/chat")
+    public ResponseEntity<?> createChat(
+            @RequestBody CreateAntragRequest request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
+        if (!isAuthorized(authHeader)) {
+            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
+        }
+
+        var userOpt = forumUserRepository.findById(request.userId());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("{\"error\": \"User nicht gefunden\"}");
+        }
+
+        var user = userOpt.get();
+
+        var antrag = new Antrag();
+        antrag.setUser(user);
+        antrag.setTeamler(null);
+        antrag.setStatus(false);
+        antrag.setTitle("Antrag " + antrag.getUser().getUsername());
+        antrag.setAntragsId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
+
+        var savedAntrag = antragRepository.save(antrag);
+        return ResponseEntity.ok(Map.of(
+                "antragsId", savedAntrag.getAntragsId(),
+                "message", "Antrag erfolgreich erstellt"
+        ));
+    }
+
+    /**
+     * Erstellt eine neue Chat-Nachricht im angegebenen Antrag.
+     * <p>
+     * Benötigt:
+     * - Authorization Header: Bearer {token}
+     * - Path Variable: antragsId (Long) → ID des Antrags, zu dem die Nachricht gehört.
+     * - Body (JSON):
+     * {
+     * "senderId": Long,   // ID des Users, der die Nachricht sendet
+     * "message": String   // Inhalt der Nachricht
+     * }
+     * <p>
+     * Antwort:
+     * - Chat DTO mit ChatId, MessageId, Message, SenderId, Antrag-Title, Username, Rank und Zeit.
+     */
     @PostMapping("/chat/{antragsId}")
-    public ResponseEntity<?> createChatMessage(@PathVariable Long antragsId, @RequestBody CreateChatMessageRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseEntity<?> sendMessage(@PathVariable Long antragsId, @RequestBody CreateChatMessageRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         if (!isAuthorized(authHeader)) {
             return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
@@ -69,6 +131,7 @@ public class ChatController {
                 saved.getMessageId(),
                 saved.getMessage(),
                 saved.getSender().getUserId(),
+                saved.getAntrag().getTitle(),
                 saved.getSender().getUsername(),
                 saved.getSender().getRank(),
                 saved.getTime()
@@ -77,6 +140,16 @@ public class ChatController {
     }
 
 
+    /**
+     * Holt alle Chat-Nachrichten für einen bestimmten Antrag.
+     * <p>
+     * Benötigt:
+     * - Authorization Header: Bearer {token}
+     * - Path Variable: antragsId (Long) → ID des Antrags.
+     * <p>
+     * Antwort:
+     * - Liste von Chat DTOs mit ChatId, MessageId, Message, SenderId, Antrag-Title, Username, Rank und Zeit.
+     */
     @GetMapping("/{antragsId}/chat")
     public ResponseEntity<?> getChatMessages(
             @PathVariable Long antragsId,
@@ -93,6 +166,7 @@ public class ChatController {
                         chat.getMessageId(),
                         chat.getMessage(),
                         chat.getSender().getUserId(),
+                        chat.getAntrag().getTitle(),
                         chat.getSender().getUsername(),
                         chat.getSender().getRank(),
                         chat.getTime()
@@ -102,6 +176,18 @@ public class ChatController {
         return ResponseEntity.ok(chats);
     }
 
+
+    /**
+     * Markiert eine Chat-Nachricht als gemeldet (reported).
+     * <p>
+     * Benötigt:
+     * - Authorization Header: Bearer {token}
+     * - Path Variable: chatid (Long) → Chat-ID der Nachricht.
+     * - Path Variable: messageid (Long) → Message-ID der Nachricht (dient zur Verifikation).
+     * <p>
+     * Antwort:
+     * - Erfolgsmeldung als JSON {"success": "Nachricht wurde gemeldet"} oder Fehler.
+     */
     @GetMapping("/report/{chatid}/{messageid}")
     public ResponseEntity<?> report(@PathVariable Long chatid, @PathVariable Long messageid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
@@ -133,5 +219,42 @@ public class ChatController {
     private boolean isReported(ChatMessage chatMessage) {
         return chatMessage.getReported().equals(true);
     }
+
+
+    /**
+     * Holt alle Anträge mit ihrer antragsId, userId und teamlerId.
+     * <p>
+     * Benötigt:
+     * - Authorization Header: Bearer {token}
+     * <p>
+     * Antwort:
+     * - Liste von AntragOverview DTOs:
+     * {
+     * "antragsId": Long,
+     * "userId": Long,
+     * "teamlerId": Long (oder null)
+     * }
+     */
+    @GetMapping("/antraege")
+    public ResponseEntity<?> getAllAntraege(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+      /*  if (!isAuthorized(authHeader)) {
+            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
+        }
+
+       */
+
+        List<AntragOverview> result = antragRepository.findAll().stream()
+                .map(a -> new AntragOverview(
+                        a.getAntragsId(),
+                        a.getUser() != null ? a.getUser().getUserId() : null,
+                        a.getTeamler() != null ? a.getTeamler().getUserId() : null,
+                        a.getTitle() != null ? a.getTitle() : ""
+                )).toList();
+
+        return ResponseEntity.ok(result);
+    }
+
+
 }
 
