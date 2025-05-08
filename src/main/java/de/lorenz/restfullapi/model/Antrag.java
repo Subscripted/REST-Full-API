@@ -2,7 +2,9 @@ package de.lorenz.restfullapi.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 @Entity
 @Table(name = "forum_entbannungs_antraege")
@@ -22,5 +24,8 @@ public class Antrag {
 
     @Column(name = "status")
     private boolean status;
+
+    @Column(name = "antrag_title")
+    private String title;
 
 }
