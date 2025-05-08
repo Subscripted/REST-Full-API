@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
@@ -57,6 +58,7 @@ public class ChatController {
         chatMessage.setAntrag(antrag);
         chatMessage.setSender(sender);
         chatMessage.setMessage(request.message());
+        chatMessage.setMessageId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
         chatMessage.setTime(LocalDateTime.now());
         chatMessage.setReported(false);
 

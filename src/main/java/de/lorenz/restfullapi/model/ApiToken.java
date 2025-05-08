@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "API_Tokens")
 public class ApiToken {
@@ -15,13 +17,7 @@ public class ApiToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
-    @Setter
     private String email;
-    @Getter
-    @Setter
     private String token;
-    @Getter
-    @Setter
     private LocalDateTime expiresAt;
 }
