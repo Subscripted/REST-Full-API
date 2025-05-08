@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<UserData, String> {
     // Auskommentiert da dies nur für einzelne Felder gut ist, da ich aber eine Response mit
     // allen Daten erwarte ist diese Methode vorerst nicht zu gebrauchen
 
-    List<UserData> getSpielerdatenByUuid(String uuid);
-    List<UserData> getSpielerdatenByName(String name);
-    List<UserData> getSpielerdatenByIp(String ip);
+    List<UserData> findSpielerdatenByUuid(String uuid);
+    List<UserData> findSpielerdatenByName(String name);
+    List<UserData> findSpielerdatenByIp(String ip);
 }

@@ -20,6 +20,7 @@ public class Antrag {
     @JoinColumn(name = "teamler_id")
     private ForumUser teamler;
 
+    @Column(name = "status")
     private boolean status;
 
 }

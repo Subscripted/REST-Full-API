@@ -16,14 +16,14 @@ public class UserdataService {
     }
 
     public List<UserData> getDatenByUuid(String uuid) {
-        return repository.getSpielerdatenByUuid(uuid);
+        return repository.findSpielerdatenByUuid(uuid);
     }
 
     public List<UserData> getDatenByName(String name) {
-        return repository.getSpielerdatenByName(name);
+        return repository.findSpielerdatenByName(name);
     }
     public List<UserData> getDatenByIp(String ip) {
-        return repository.getSpielerdatenByIp(ip);
+        return repository.findSpielerdatenByIp(ip);
     }
 
     /**
