@@ -21,19 +21,8 @@ public class UserController {
         this.tokenService = tokenService;
     }
 
-    private boolean isAuthorized(String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            return tokenService.isTokenValid(token);
-        }
-        return false;
-    }
-
     @GetMapping("/uuid/{uuid}")
     public ResponseEntity<?> getSpielerdatenByUUID(@PathVariable String uuid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
 
         List<UserData> daten = spielerdatenService.getDatenByUuid(uuid);
         return ResponseEntity.ok(new ResponseWrapper<>(daten));
@@ -41,18 +30,14 @@ public class UserController {
 
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getSpielerdatenByName(@PathVariable String name, @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
+
         List<UserData> daten = spielerdatenService.getDatenByName(name);
         return ResponseEntity.ok(new ResponseWrapper<>(daten));
     }
 
     @GetMapping("/ip/{ip}")
     public ResponseEntity<?> getSpielerdatenByIp(@PathVariable String ip, @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
+
         List<UserData> daten = spielerdatenService.getDatenByIp(ip);
         return ResponseEntity.ok(new ResponseWrapper<>(daten));
     }

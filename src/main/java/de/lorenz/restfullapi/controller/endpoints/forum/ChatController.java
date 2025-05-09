@@ -29,15 +29,6 @@ public class ChatController {
     private final AntragRepository antragRepository;
     private final ForumUserRepository forumUserRepository;
 
-
-    private boolean isAuthorized(String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            return tokenService.isTokenValid(token);
-        }
-        return false;
-    }
-
     /**
      * Erstellt einen neuen Antrag (Chat-Thread).
      * <p>
@@ -57,9 +48,6 @@ public class ChatController {
             @RequestBody CreateAntragRequest request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
 
         var userOpt = forumUserRepository.findById(request.userId());
         if (userOpt.isEmpty()) {
@@ -100,9 +88,6 @@ public class ChatController {
     @PostMapping("/chat/{antragsId}")
     public ResponseEntity<?> sendMessage(@PathVariable Long antragsId, @RequestBody CreateChatMessageRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
 
         var antragOpt = antragRepository.findById(antragsId);
         if (antragOpt.isEmpty()) {
@@ -155,10 +140,6 @@ public class ChatController {
             @PathVariable Long antragsId,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
-
         List<Chat> chats = forumChatMessageRepository.findByAntrag_AntragsIdOrderByTimeAsc(antragsId)
                 .stream()
                 .map(chat -> new Chat(
@@ -190,10 +171,6 @@ public class ChatController {
      */
     @GetMapping("/report/{chatid}/{messageid}")
     public ResponseEntity<?> report(@PathVariable Long chatid, @PathVariable Long messageid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
-        if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
 
         ChatMessage chatMessage = forumChatMessageRepository.findById(chatid).orElse(null);
 
