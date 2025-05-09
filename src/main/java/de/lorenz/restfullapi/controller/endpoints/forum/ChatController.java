@@ -55,12 +55,11 @@ public class ChatController {
         }
 
         var user = userOpt.get();
-
         var antrag = new Antrag();
         antrag.setUser(user);
         antrag.setTeamler(null);
         antrag.setStatus(false);
-        antrag.setTitle("Antrag " + antrag.getUser().getUsername());
+        antrag.setTitle("Entbannungsantrag - " + antrag.getUser().getUsername() + -antrag.getAntragsId());
         antrag.setAntragsId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
 
         var savedAntrag = antragRepository.save(antrag);
