@@ -4,6 +4,7 @@ import de.lorenz.restfullapi.dto.AntragOverview;
 import de.lorenz.restfullapi.dto.Chat;
 import de.lorenz.restfullapi.dto.CreateAntragRequest;
 import de.lorenz.restfullapi.dto.CreateChatMessageRequest;
+import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import de.lorenz.restfullapi.model.Antrag;
 import de.lorenz.restfullapi.model.ChatMessage;
 import de.lorenz.restfullapi.repository.AntragRepository;
@@ -31,14 +32,12 @@ public class ChatController {
 
     /**
      * Erstellt einen neuen Antrag (Chat-Thread).
-     * <p>
      * Benötigt:
      * - Authorization Header: Bearer {token}
      * - Body (JSON):
      * {
      * "userId": Long // ID des Users, der den Antrag stellt
      * }
-     * <p>
      * Antwort:
      * - antragsId (Long)
      * - message (String)
@@ -59,14 +58,14 @@ public class ChatController {
         antrag.setUser(user);
         antrag.setTeamler(null);
         antrag.setStatus(false);
-        antrag.setTitle("Entbannungsantrag - " + antrag.getUser().getUsername() + -antrag.getAntragsId());
+        antrag.setTitle("Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId());
         antrag.setAntragsId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
 
         var savedAntrag = antragRepository.save(antrag);
-        return ResponseEntity.ok(Map.of(
+        return ResponseEntity.ok(new ResponseWrapper<>(Map.of(
                 "antragsId", savedAntrag.getAntragsId(),
-                "message", "Antrag erfolgreich erstellt"
-        ));
+                "message", "Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId() + " Erstellt!"
+        )));
     }
 
     /**
@@ -110,16 +109,7 @@ public class ChatController {
 
         ChatMessage saved = forumChatMessageRepository.save(chatMessage);
 
-        Chat dto = new Chat(
-                saved.getChatId(),
-                saved.getMessageId(),
-                saved.getMessage(),
-                saved.getSender().getUserId(),
-                saved.getAntrag().getTitle(),
-                saved.getSender().getUsername(),
-                saved.getSender().getRank(),
-                saved.getTime()
-        );
+        Chat dto = new Chat(saved.getChatId(), saved.getMessageId(), saved.getMessage(), saved.getSender().getUserId(), saved.getAntrag().getTitle(), saved.getSender().getUsername(), saved.getSender().getRank(), saved.getTime());
         return ResponseEntity.ok(dto);
     }
 
