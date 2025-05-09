@@ -1,19 +1,17 @@
 package de.lorenz.restfullapi.service;
 
 import de.lorenz.restfullapi.model.UserData;
-import de.lorenz.restfullapi.repository.UserRepository;
+import de.lorenz.restfullapi.repository.SpielerRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class UserdataService {
+@RequiredArgsConstructor
+public class SpielerdataService {
 
-    private final UserRepository repository;
-
-    public UserdataService(UserRepository repository) {
-        this.repository = repository;
-    }
+    private final SpielerRepository repository;
 
     public List<UserData> getDatenByUuid(String uuid) {
         return repository.findSpielerdatenByUuid(uuid);
@@ -22,6 +20,7 @@ public class UserdataService {
     public List<UserData> getDatenByName(String name) {
         return repository.findSpielerdatenByName(name);
     }
+
     public List<UserData> getDatenByIp(String ip) {
         return repository.findSpielerdatenByIp(ip);
     }

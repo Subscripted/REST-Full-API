@@ -1,26 +1,25 @@
 package de.lorenz.restfullapi.dto.wrapper;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Collection;
 
+@RequiredArgsConstructor
 public class ResponseWrapper<T> {
 
-    private T data;
+    @Getter
+    private T response;
+
+    @Getter
     private int count;
 
-    public ResponseWrapper(T data) {
-        this.data = data;
-        if (data instanceof Collection<?>) {
-            this.count = ((Collection<?>) data).size();
+    public ResponseWrapper(T response) {
+        this.response = response;
+        if (response instanceof Collection<?>) {
+            this.count = ((Collection<?>) response).size();
         } else {
             this.count = 1;
         }
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public int getCount() {
-        return count;
     }
 }
