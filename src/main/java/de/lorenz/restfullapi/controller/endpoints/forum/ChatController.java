@@ -135,14 +135,13 @@ public class ChatController {
                         chat.getChatId(),
                         chat.getMessageId(),
                         chat.getMessage(),
-                        chat.getSender().getUserId(),
+                        chat.getSender() != null ? chat.getSender().getUserId() : 0,
                         chat.getAntrag().getTitle(),
-                        chat.getSender().getUsername(),
-                        chat.getSender().getRank(),
+                        chat.getSender() != null ? chat.getSender().getUsername() : "Unbekannt",
+                        chat.getSender() != null ? chat.getSender().getRank() : "Unbekannt",
                         chat.getTime()
                 ))
                 .toList();
-
         return ResponseEntity.ok(chats);
     }
 
@@ -209,11 +208,11 @@ public class ChatController {
         }
 
        */
-
         List<AntragOverview> result = antragRepository.findAll().stream()
                 .map(a -> new AntragOverview(
                         a.getAntragsId(),
                         a.getUser() != null ? a.getUser().getUserId() : null,
+                        a.getUser() != null && a.getUser().getUsername() != null ? a.getUser().getUsername() : "Unbekannt",
                         a.getTeamler() != null ? a.getTeamler().getUserId() : null,
                         a.getTitle() != null ? a.getTitle() : ""
                 )).toList();

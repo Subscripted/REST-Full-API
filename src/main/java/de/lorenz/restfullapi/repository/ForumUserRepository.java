@@ -16,9 +16,9 @@ public interface ForumUserRepository extends JpaRepository<ForumUser, Long> {
 
     List<ForumUser> findForumUserByRank(String rank);
 
-
-    //Stand jetzt noch Fehler weil in der chat Tabelle noch ein User mit der id ist.
     @Transactional
     void deleteForumUserByUserId(Long userId);
+
+    boolean existsByEmail(String email);
 }
 

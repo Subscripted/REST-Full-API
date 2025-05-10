@@ -2,11 +2,12 @@ package de.lorenz.restfullapi.service;
 
 import de.lorenz.restfullapi.model.Antrag;
 import de.lorenz.restfullapi.model.ForumUser;
-import de.lorenz.restfullapi.model.UserData;
 import de.lorenz.restfullapi.repository.AntragRepository;
 import de.lorenz.restfullapi.repository.ForumChatMessageRepository;
 import de.lorenz.restfullapi.repository.ForumUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,24 +39,16 @@ public class ForumUserDataService {
 
     @Transactional
     public void deleteSingleByUserId(Long userId) {
-        // 1. Zuerst alle Chatnachrichten zu den Anträgen des Users löschen
-        var antraege = antragRepository.findByUser_UserId(userId);
-        for (Antrag antrag : antraege) {
-            forumChatMessageRepository.deleteByAntrag_AntragsId(antrag.getAntragsId());
-        }
-
-        // 2. Anträge löschen
-        antragRepository.deleteByUser_UserId(userId);
-        antragRepository.deleteByTeamler_UserId(userId);
-
-        // 3. Chatnachrichten, die direkt vom User gesendet wurden (außerhalb Antrag ggf.)
-        forumChatMessageRepository.deleteBySender_UserId(userId);
-
-        // 4. Den User selbst löschen
+        antragRepository.nullifyUserInAntrag(userId);
+        antragRepository.nullifyTeamlerInAntrag(userId);
+        forumChatMessageRepository.nullifySenderByUserId(userId);
         repository.deleteForumUserByUserId(userId);
     }
 
 
 
+    public void createUser(ForumUser forumUser) {
+        repository.save(forumUser);
+    }
 
 }

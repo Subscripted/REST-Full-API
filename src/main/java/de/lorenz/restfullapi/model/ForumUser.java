@@ -2,7 +2,9 @@ package de.lorenz.restfullapi.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 @Entity
 @Table(name = "forum_user")
@@ -10,7 +12,6 @@ public class ForumUser {
 
     @Id
     @Column(name = "user_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
     private String username;
