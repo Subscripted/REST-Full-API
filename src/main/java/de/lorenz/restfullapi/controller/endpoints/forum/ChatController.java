@@ -1,9 +1,6 @@
 package de.lorenz.restfullapi.controller.endpoints.forum;
 
-import de.lorenz.restfullapi.dto.AntragOverview;
-import de.lorenz.restfullapi.dto.Chat;
-import de.lorenz.restfullapi.dto.CreateAntragRequest;
-import de.lorenz.restfullapi.dto.CreateChatMessageRequest;
+import de.lorenz.restfullapi.dto.*;
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import de.lorenz.restfullapi.model.Antrag;
 import de.lorenz.restfullapi.model.ChatMessage;
@@ -62,10 +59,9 @@ public class ChatController {
         antrag.setAntragsId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
 
         var savedAntrag = antragRepository.save(antrag);
-        return ResponseEntity.ok(ResponseWrapper.ok(Map.of(
-                "antragsId", savedAntrag.getAntragsId(),
-                "message", "Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId() + " Erstellt!"
-        )));
+
+        Map<String, Object> res = Map.of("antragsId", savedAntrag.getAntragsId(), "message", "Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId() + " Erstellt!");
+        return ResponseEntity.ok(ResponseWrapper.ok(res));
     }
 
     /**
@@ -113,6 +109,19 @@ public class ChatController {
         return ResponseEntity.ok(dto);
     }
 
+
+    @DeleteMapping("/antrag/{antragsId}")
+    public ResponseWrapper<Object> deleteAntrag(@PathVariable Long antragsId) {
+        var antragOpt = antragRepository.findById(antragsId);
+
+        if (antragOpt.isEmpty()) {
+            return ResponseWrapper.error("Not found", "Antrag mit ID " + antragsId + " wurde nicht gefunden.");
+        }
+
+        forumChatMessageRepository.deleteByAntrag_AntragsId(antragsId);
+        antragRepository.deleteById(antragsId);
+        return ResponseWrapper.ok(antragsId, "Antrag erfolgreich gelöscht.");
+    }
 
     /**
      * Holt alle Chat-Nachrichten für einen bestimmten Antrag.
