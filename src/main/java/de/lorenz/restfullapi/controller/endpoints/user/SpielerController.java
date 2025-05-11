@@ -20,20 +20,20 @@ public class SpielerController {
     public ResponseEntity<?> getSpielerdatenByUUID(@PathVariable String uuid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         List<UserData> daten = spielerdatenService.getDatenByUuid(uuid);
-        return ResponseEntity.ok(new ResponseWrapper<>(daten));
+        return ResponseEntity.ok(ResponseWrapper.ok(daten));
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getSpielerdatenByName(@PathVariable String name, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         List<UserData> daten = spielerdatenService.getDatenByName(name);
-        return ResponseEntity.ok(new ResponseWrapper<>(daten));
+        return ResponseEntity.ok(ResponseWrapper.ok(daten));
     }
 
     @GetMapping("/ip/{ip}")
     public ResponseEntity<?> getSpielerdatenByIp(@PathVariable String ip, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         List<UserData> daten = spielerdatenService.getDatenByIp(ip);
-        return ResponseEntity.ok(new ResponseWrapper<>(daten));
+        return ResponseEntity.ok(ResponseWrapper.ok(daten));
     }
 }

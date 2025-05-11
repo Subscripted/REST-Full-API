@@ -62,7 +62,7 @@ public class ChatController {
         antrag.setAntragsId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
 
         var savedAntrag = antragRepository.save(antrag);
-        return ResponseEntity.ok(new ResponseWrapper<>(Map.of(
+        return ResponseEntity.ok(ResponseWrapper.ok(Map.of(
                 "antragsId", savedAntrag.getAntragsId(),
                 "message", "Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId() + " Erstellt!"
         )));

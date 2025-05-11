@@ -1,8 +1,11 @@
 package de.lorenz.restfullapi.dto.wrapper;
 
+import de.lorenz.restfullapi.model.UserData;
 import lombok.Getter;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 public class ResponseWrapper<T> {
@@ -12,16 +15,18 @@ public class ResponseWrapper<T> {
     private final String statusCode;
     private final int count;
 
-    private ResponseWrapper(T response, String message, String statusCode) {
-        this.response = response;
+    public ResponseWrapper(T response, String message, String statusCode) {
         this.message = message;
         this.statusCode = statusCode;
+        this.response = response;
         if (response instanceof Collection<?>) {
             this.count = ((Collection<?>) response).size();
         } else {
             this.count = response != null ? 1 : 0;
         }
     }
+
+
 
     public static <T> ResponseWrapper<T> ok(T data) {
         return new ResponseWrapper<>(data, "OK", "200");
