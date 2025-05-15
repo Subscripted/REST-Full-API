@@ -1,18 +1,20 @@
 package de.lorenz.restfullapi.controller.endpoints.user;
 
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
+import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
 import de.lorenz.restfullapi.model.ForumUser;
-import de.lorenz.restfullapi.model.UserData;
 import de.lorenz.restfullapi.repository.ForumUserRepository;
 import de.lorenz.restfullapi.service.ForumUserDataService;
-import de.lorenz.restfullapi.service.SpielerdataService;
 import de.lorenz.restfullapi.utils.RestUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
@@ -23,6 +25,8 @@ public class UserController {
     private final ForumUserRepository repository;
     private final RestUtils restUtils;
 
+    private Map<String, Object> json;
+
     @DeleteMapping("/deleteUser/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         forumUserDataService.deleteSingleByUserId(userId);
@@ -30,29 +34,47 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createUser(@RequestBody ForumUser user) {
+    public ResponseWrapper<Map<String, Object>> createUser(@RequestBody ForumUser user) {
         user.setUserId(restUtils.generateUserId());
+        //todo: Späteres Problem was auftreten könnte, das die LocalDatetime eine Stunde zurückliegt, Filter für Zeitzonen entwicklen
+        user.setCreation_date(LocalDateTime.now());
 
-        if (user.getEmail() == null) {
-            return ResponseEntity.badRequest().body("Email is required");
+        if (user.getEmail() == null || user.getEmail().equals("")) {
+            json = new HashMap<>();
+            json.put("message", GlobalExceptionMsg.USER_NO_CREATION_MISSING_CREDENTIALS.getExceptionMsg());
+            return ResponseWrapper.badRequest(json, "Email is required");
         }
 
-        if (user.getPassword() == null) {
-            return ResponseEntity.badRequest().body("Password is required");
+        if (user.getPassword() == null || user.getPassword().equals("")) {
+            json = new HashMap<>();
+            json.put("message", GlobalExceptionMsg.USER_NO_CREATION_MISSING_CREDENTIALS.getExceptionMsg());
+            return ResponseWrapper.badRequest(json, "Password is required");
         }
 
-        if (user.getUsername() == null) {
-            return ResponseEntity.badRequest().body("Username is required");
+        if (user.getUsername() == null || user.getUsername().equals("")) {
+            json = new HashMap<>();
+            json.put("message", GlobalExceptionMsg.USER_NO_CREATION_MISSING_CREDENTIALS.getExceptionMsg());
+
+            return ResponseWrapper.badRequest(json, "Username is required");
         }
 
         if (repository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("User with that Email already exists.");
+
+            json = new HashMap<>();
+            json.put("message", GlobalExceptionMsg.USER_NO_CREATION_ALREADY_EXISTS.getExceptionMsg());
+            json.put("email", user.getEmail());
+            return ResponseWrapper.error(json, "User with that email already exists");
         }
         if (repository.existsById(user.getUserId())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("User ID already exists.");
+            return ResponseWrapper.badRequest("User ID already exists.");
         }
         forumUserDataService.createUser(user);
-        return ResponseEntity.ok("User created with ID: " + user.getUserId());
+
+        json = new HashMap<>();
+        json.put("message", GlobalExceptionMsg.USER_CREATED.getExceptionMsg());
+        json.put("userId", user.getUserId());
+
+        return ResponseWrapper.ok(json, "User with ID (" + user.getUserId() + ") created successfully");
     }
 
     /** Kleine Methode zum Herumtesten von POST werten
