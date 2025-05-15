@@ -47,7 +47,7 @@ public class ForumUserDataService {
 
 
 
-    public void createUser(ForumUser forumUser) {
+    public void createUser(ForumUser forumUser) {;
         repository.save(forumUser);
     }
 
