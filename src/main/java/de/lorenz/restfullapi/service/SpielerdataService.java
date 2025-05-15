@@ -25,17 +25,4 @@ public class SpielerdataService {
         return repository.findSpielerdatenByIp(ip);
     }
 
-    /**
-     public boolean updateNameByUuid(String uuid, String name) {
-     Optional<UserData> optionalData = repository.findByUuid(uuid);
-     if (optionalData.isPresent()) {
-     UserData data = optionalData.get();
-     data.setName(name);
-     repository.save(data);
-     return true;
-     } else {
-     return false;
-     }
-     }
-     `*/
 }

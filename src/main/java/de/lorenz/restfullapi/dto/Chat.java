@@ -1,8 +1,5 @@
 package de.lorenz.restfullapi.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.time.LocalDateTime;
 
 
