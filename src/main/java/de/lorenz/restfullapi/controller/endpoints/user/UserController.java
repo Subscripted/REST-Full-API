@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -32,6 +34,8 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody ForumUser user) {
         user.setUserId(restUtils.generateUserId());
+        //todo: Späteres Problem was auftreten könnte, das die LocalDatetime eine Stunde zurückliegt, Filter für Zeitzonen entwicklen
+        user.setCreation_date(LocalDateTime.now());
 
         if (user.getEmail() == null) {
             return ResponseEntity.badRequest().body("Email is required");
