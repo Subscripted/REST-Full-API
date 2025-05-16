@@ -23,27 +23,21 @@ import java.util.UUID;
 public class ChatController {
 
     private final ForumChatMessageRepository forumChatMessageRepository;
-    private final TokenService tokenService;
     private final AntragRepository antragRepository;
     private final ForumUserRepository forumUserRepository;
 
     /**
-     * Erstellt einen neuen Antrag (Chat-Thread).
-     * Benötigt:
-     * - Authorization Header: Bearer {token}
-     * - Body (JSON):
-     * {
-     * "userId": Long // ID des Users, der den Antrag stellt
+     * @Usage {
+     * "userId":Long
      * }
-     * Antwort:
+     * @Description Erstellt einen neuen Antrag
+     * @Response Antwort:
      * - antragsId (Long)
      * - message (String)
+     * @see #createChat(CreateAntragRequest, String)
      */
     @PostMapping("/new/chat")
-    public ResponseEntity<?> createChat(
-            @RequestBody CreateAntragRequest request,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
+    public ResponseEntity<?> createChat(@RequestBody CreateAntragRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         var userOpt = forumUserRepository.findById(request.userId());
         if (userOpt.isEmpty()) {
@@ -65,29 +59,35 @@ public class ChatController {
     }
 
     /**
-     * Erstellt eine neue Chat-Nachricht im angegebenen Antrag.
-     * <p>
-     * Benötigt:
-     * - Authorization Header: Bearer {token}
-     * - Path Variable: antragsId (Long) → ID des Antrags, zu dem die Nachricht gehört.
-     * - Body (JSON):
+     * @Usage POST /api/v1/entbannungs-antrag/chat/{antragsId}
+     * Header:
+     * Authorization: Bearer {token}
+     * Body:
      * {
-     * "senderId": Long,   // ID des Users, der die Nachricht sendet
-     * "message": String   // Inhalt der Nachricht
+     * "senderId": Long,
+     * "message": String
      * }
-     * <p>
-     * Antwort:
-     * - Chat DTO mit ChatId, MessageId, Message, SenderId, Antrag-Title, Username, Rank und Zeit.
+     * @Description Sendet eine neue Nachricht in den Antrag-Chat. Der Antrag muss existieren,
+     * und der Sender muss ein bekannter Nutzer sein. Die Nachricht wird mit einer zufälligen
+     * Message-ID und dem aktuellen Zeitstempel gespeichert.
+     * @Response Antwort:
+     * - chatId (Long)
+     * - messageId (Long)
+     * - message (String)
+     * - senderId (Long)
+     * - title (String)
+     * - username (String)
+     * - rank (String)
+     * - time (DateTime)
+     * @see #sendMessage(Long, CreateChatMessageRequest, String)
      */
     @PostMapping("/chat/{antragsId}")
     public ResponseEntity<?> sendMessage(@PathVariable Long antragsId, @RequestBody CreateChatMessageRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
-
         var antragOpt = antragRepository.findById(antragsId);
         if (antragOpt.isEmpty()) {
             return ResponseEntity.status(404).body("{\"error\": \"Antrag nicht gefunden\"}");
         }
-        var antrag = antragOpt.get();
+        Antrag antrag = antragOpt.get();
 
         var senderOpt = forumUserRepository.findById(request.senderId());
         if (senderOpt.isEmpty()) {
@@ -109,6 +109,15 @@ public class ChatController {
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * @Usage DELETE /api/v1/entbannungs-antrag/antrag/{antragsId}
+     * @Description Löscht einen Antrag inklusive aller zugehörigen Chat-Nachrichten.
+     * Wenn der Antrag nicht existiert, wird eine Fehlermeldung zurückgegeben.
+     * @Response Antwort:
+     * - antragsId (Long)
+     * - message (String)
+     * @see #deleteAntrag(Long)
+     */
 
     @DeleteMapping("/antrag/{antragsId}")
     public ResponseWrapper<Object> deleteAntrag(@PathVariable Long antragsId) {
@@ -124,20 +133,27 @@ public class ChatController {
     }
 
     /**
-     * Holt alle Chat-Nachrichten für einen bestimmten Antrag.
-     * <p>
-     * Benötigt:
-     * - Authorization Header: Bearer {token}
-     * - Path Variable: antragsId (Long) → ID des Antrags.
-     * <p>
-     * Antwort:
-     * - Liste von Chat DTOs mit ChatId, MessageId, Message, SenderId, Antrag-Title, Username, Rank und Zeit.
+     * @Usage GET /api/v1/entbannungs-antrag/{antragsId}/chat
+     * Header:
+     * Authorization: Bearer {token}
+     * @Description Gibt alle Chat-Nachrichten für den angegebenen Antrag zurück.
+     * Die Nachrichten sind nach Zeit aufsteigend sortiert. Wenn ein Sender nicht mehr existiert,
+     * wird "Unbekannt" angezeigt.
+     * @Response Antwort:
+     * Liste von Objekten mit:
+     * - chatId (Long)
+     * - messageId (Long)
+     * - message (String)
+     * - senderId (Long oder 0)
+     * - title (String)
+     * - username (String)
+     * - rank (String)
+     * - time (DateTime)
+     * @see #getChatMessages(Long, String)
      */
-    @GetMapping("/{antragsId}/chat")
-    public ResponseEntity<?> getChatMessages(
-            @PathVariable Long antragsId,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
+    @GetMapping("/{antragsId}/chat")
+    public ResponseEntity<?> getChatMessages(@PathVariable Long antragsId, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         List<Chat> chats = forumChatMessageRepository.findByAntrag_AntragsIdOrderByTimeAsc(antragsId)
                 .stream()
                 .map(chat -> new Chat(
@@ -146,8 +162,8 @@ public class ChatController {
                         chat.getMessage(),
                         chat.getSender() != null ? chat.getSender().getUserId() : 0,
                         chat.getAntrag().getTitle(),
-                        chat.getSender() != null ? chat.getSender().getUsername() : "Unbekannt",
-                        chat.getSender() != null ? chat.getSender().getRank() : "Unbekannt",
+                        chat.getSender() != null ? chat.getSender().getUsername() : "Unknown",
+                        chat.getSender() != null ? chat.getSender().getRank() : "Unknown",
                         chat.getTime()
                 ))
                 .toList();
@@ -156,67 +172,55 @@ public class ChatController {
 
 
     /**
-     * Markiert eine Chat-Nachricht als gemeldet (reported).
-     * <p>
-     * Benötigt:
-     * - Authorization Header: Bearer {token}
-     * - Path Variable: chatid (Long) → Chat-ID der Nachricht.
-     * - Path Variable: messageid (Long) → Message-ID der Nachricht (dient zur Verifikation).
-     * <p>
-     * Antwort:
-     * - Erfolgsmeldung als JSON {"success": "Nachricht wurde gemeldet"} oder Fehler.
+     * @Usage GET /api/v1/entbannungs-antrag/report/{chatid}/{messageid}
+     * Header:
+     * Authorization: Bearer {token}
+     * @Description Markiert eine Chat-Nachricht als "gemeldet". Die Nachricht muss existieren,
+     * die `messageId` muss zur Chat-Nachricht passen, und die Nachricht darf noch nicht gemeldet worden sein.
+     * @Response Antwort:
+     * - {"success": "Nachricht wurde gemeldet"}
+     * oder Fehler:
+     * - {"error": "..."}
+     * @see #report(Long, Long, String)
      */
+
     @GetMapping("/report/{chatid}/{messageid}")
     public ResponseEntity<?> report(@PathVariable Long chatid, @PathVariable Long messageid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
         ChatMessage chatMessage = forumChatMessageRepository.findById(chatid).orElse(null);
 
         if (chatMessage == null) {
             return ResponseEntity.status(404).body("{\"error\": \"Chat-Nachricht nicht gefunden\"}");
         }
-
         if (chatMessage.getMessageId() == null || !chatMessage.getMessageId().equals(messageid)) {
             return ResponseEntity.status(400).body("{\"error\": \"Message-ID stimmt nicht überein\"}");
         }
-
         if (isReported(chatMessage)) {
             return ResponseEntity.status(400).body("{\"error\": \"Nachricht wurde bereits gemeldet\"}");
         }
 
         chatMessage.setReported(true);
         forumChatMessageRepository.save(chatMessage);
-
         return ResponseEntity.ok("{\"success\": \"Nachricht wurde gemeldet\"}");
     }
 
-
-    private boolean isReported(ChatMessage chatMessage) {
-        return chatMessage.getReported().equals(true);
-    }
-
-
     /**
-     * Holt alle Anträge mit ihrer antragsId, userId und teamlerId.
-     * <p>
-     * Benötigt:
-     * - Authorization Header: Bearer {token}
-     * <p>
-     * Antwort:
-     * - Liste von AntragOverview DTOs:
-     * {
-     * "antragsId": Long,
-     * "userId": Long,
-     * "teamlerId": Long (oder null)
-     * }
+     * @Usage GET /api/v1/entbannungs-antrag/antraege
+     * Header:
+     * Authorization: Bearer {token}
+     * @Description Holt alle gespeicherten Entbannungsanträge mit grundlegenden Informationen
+     * wie Antrag-ID, Nutzer-ID, Teamler-ID und Antragstitel.
+     * @Response Antwort:
+     * Liste von Objekten mit:
+     * - antragsId (Long)
+     * - userId (Long oder null)
+     * - username (String)
+     * - teamlerId (Long oder null)
+     * - title (String)
+     * @see #getAllAntraege(String)
      */
+
     @GetMapping("/antraege")
     public ResponseEntity<?> getAllAntraege(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-
-      /*  if (!isAuthorized(authHeader)) {
-            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-        }
-
-       */
         List<AntragOverview> result = antragRepository.findAll().stream()
                 .map(a -> new AntragOverview(
                         a.getAntragsId(),
@@ -225,10 +229,12 @@ public class ChatController {
                         a.getTeamler() != null ? a.getTeamler().getUserId() : null,
                         a.getTitle() != null ? a.getTitle() : ""
                 )).toList();
-
         return ResponseEntity.ok(result);
     }
 
+    private boolean isReported(ChatMessage chatMessage) {
+        return chatMessage.getReported().equals(true);
+    }
 
 }
 
