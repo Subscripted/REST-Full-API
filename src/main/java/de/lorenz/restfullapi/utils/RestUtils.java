@@ -7,7 +7,6 @@ import java.util.Random;
 @Service
 public class RestUtils {
 
-
     public Long generateUserId() {
         String digits = "1234567890";
         StringBuilder sb = new StringBuilder();

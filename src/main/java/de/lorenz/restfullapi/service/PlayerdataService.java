@@ -1,21 +1,19 @@
 package de.lorenz.restfullapi.service;
 
 import de.lorenz.restfullapi.model.UserData;
-import de.lorenz.restfullapi.repository.SpielerRepository;
+import de.lorenz.restfullapi.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SpielerdataService {
+public class PlayerdataService {
 
-    private final SpielerRepository repository;
+    private final PlayerRepository repository;
 
     public Map<String, Object> getDatenByUuid(String uuid) {
         List<UserData> daten = repository.findSpielerdatenByUuid(uuid);

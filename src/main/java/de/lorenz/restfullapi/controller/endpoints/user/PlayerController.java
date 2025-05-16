@@ -2,7 +2,7 @@ package de.lorenz.restfullapi.controller.endpoints.user;
 
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
-import de.lorenz.restfullapi.service.SpielerdataService;
+import de.lorenz.restfullapi.service.PlayerdataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +12,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/spieler")
-public class SpielerController {
+public class PlayerController {
 
-    private final SpielerdataService spielerdatenService;
+    private final PlayerdataService spielerdatenService;
 
     @GetMapping("/uuid/{uuid}")
     public ResponseWrapper<?> getSpielerdatenByUUID(@PathVariable String uuid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
@@ -22,7 +22,7 @@ public class SpielerController {
         if (!datenExists(daten)) {
             return ResponseWrapper.notFound(daten, String.format(GlobalExceptionMsg.SPIELER_DATEN_BY_UUID_EMPTY.getExceptionMsg(), uuid));
         }
-        daten.put("message", GlobalExceptionMsg.SPIELER_DATEN_BY_NAME.getExceptionMsg());
+        daten.put("message", GlobalExceptionMsg.PLAYER_DATA_BY_NAME.getExceptionMsg());
 
         return ResponseWrapper.ok(daten, "User Data Send Successfully");
     }

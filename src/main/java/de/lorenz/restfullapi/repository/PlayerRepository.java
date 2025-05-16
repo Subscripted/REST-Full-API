@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SpielerRepository extends JpaRepository<UserData, String> {
+public interface PlayerRepository extends JpaRepository<UserData, String> {
 
     // Optional<UserData> findByUuid(String uuid);
     // Auskommentiert da dies nur für einzelne Felder gut ist, da ich aber eine Response mit
