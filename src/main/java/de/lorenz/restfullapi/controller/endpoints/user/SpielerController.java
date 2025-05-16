@@ -1,13 +1,13 @@
 package de.lorenz.restfullapi.controller.endpoints.user;
 
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
-import de.lorenz.restfullapi.model.UserData;
+import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
 import de.lorenz.restfullapi.service.SpielerdataService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,23 +17,41 @@ public class SpielerController {
     private final SpielerdataService spielerdatenService;
 
     @GetMapping("/uuid/{uuid}")
-    public ResponseEntity<?> getSpielerdatenByUUID(@PathVariable String uuid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseWrapper<?> getSpielerdatenByUUID(@PathVariable String uuid, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Map<String, Object> daten = spielerdatenService.getDatenByUuid(uuid);
+        if (!datenExists(daten)) {
+            return ResponseWrapper.notFound(daten, String.format(GlobalExceptionMsg.SPIELER_DATEN_BY_UUID_EMPTY.getExceptionMsg(), uuid));
+        }
+        daten.put("message", GlobalExceptionMsg.SPIELER_DATEN_BY_NAME.getExceptionMsg());
 
-        List<UserData> daten = spielerdatenService.getDatenByUuid(uuid);
-        return ResponseEntity.ok(ResponseWrapper.ok(daten));
+        return ResponseWrapper.ok(daten, "User Data Send Successfully");
     }
+
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<?> getSpielerdatenByName(@PathVariable String name, @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
-        List<UserData> daten = spielerdatenService.getDatenByName(name);
-        return ResponseEntity.ok(ResponseWrapper.ok(daten));
+    public ResponseWrapper<?> getSpielerdatenByName(@PathVariable String name, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Map<String, Object> daten = spielerdatenService.getDatenByName(name);
+        if (!datenExists(daten)) {
+            return ResponseWrapper.notFound(daten, String.format(GlobalExceptionMsg.SPIELER_DATEN_BY_NAME_EMPTY.getExceptionMsg(), name));
+        }
+        daten.put("message", "User data fetched by name");
+        return ResponseWrapper.ok(daten, "User Data Send Successfully");
     }
 
-    @GetMapping("/ip/{ip}")
-    public ResponseEntity<?> getSpielerdatenByIp(@PathVariable String ip, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        List<UserData> daten = spielerdatenService.getDatenByIp(ip);
-        return ResponseEntity.ok(ResponseWrapper.ok(daten));
+    @GetMapping("/ip/{ip}")
+    public ResponseWrapper<?> getSpielerdatenByIp(@PathVariable String ip, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Map<String, Object> daten = spielerdatenService.getDatenByIp(ip);
+
+        if (!datenExists(daten)) {
+            return ResponseWrapper.notFound(daten, String.format(GlobalExceptionMsg.SPIELER_DATEN_BY_IP_EMPTY.getExceptionMsg(), ip));
+        }
+        daten.put("message", "User data fetched by IP");
+        return ResponseWrapper.ok(daten, "User Data Send Successfully");
+    }
+
+    private boolean datenExists(Map<String, Object> daten) {
+        Object d = daten.get("daten");
+        return d != null && (!(d instanceof List) || !((List<?>) d).isEmpty());
     }
 }

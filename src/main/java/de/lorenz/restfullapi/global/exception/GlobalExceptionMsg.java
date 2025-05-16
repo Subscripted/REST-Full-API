@@ -12,7 +12,12 @@ public enum GlobalExceptionMsg {
 
     USER_NO_CREATION_MISSING_CREDENTIALS("User creation failed: missing required user information."),
     USER_NO_CREATION_ALREADY_EXISTS("User creation failed: user already exists."),
-    USER_CREATED("User creation successful.");
+    USER_CREATED("User creation successful."),
+    SPIELER_DATEN_BY_NAME("Playerdata Fetched Successfully"),
+
+    SPIELER_DATEN_BY_UUID_EMPTY("Playerdata Fetch failed: no Playerdata was found with given uuid %s."),
+    SPIELER_DATEN_BY_NAME_EMPTY("Playerdata Fetch failed: no Playerdata was found."),
+    SPIELER_DATEN_BY_IP_EMPTY("Playerdata Fetch failed: No Playerdata found with given IP %s.");
 
 
     public final String ExceptionMsg;
