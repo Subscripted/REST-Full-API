@@ -58,6 +58,8 @@ public class UserController {
             return ResponseWrapper.badRequest(json, "Username is required");
         }
 
+
+
         if (repository.existsByEmail(user.getEmail())) {
 
             json = new HashMap<>();
