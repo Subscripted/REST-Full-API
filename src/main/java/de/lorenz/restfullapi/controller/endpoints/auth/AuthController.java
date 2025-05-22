@@ -1,10 +1,11 @@
 package de.lorenz.restfullapi.controller.endpoints.auth;
 
 import de.lorenz.restfullapi.dto.TokenRequest;
+import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
+import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
 import de.lorenz.restfullapi.model.LoginCreds;
 import de.lorenz.restfullapi.repository.LoginCredsRepository;
 import de.lorenz.restfullapi.service.TokenService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ public class AuthController {
 
     private final TokenService tokenService;
     private final LoginCredsRepository loginCredsRepository;
+    Map<String, String> response;
 
     public AuthController(TokenService tokenService, LoginCredsRepository loginCredsRepository) {
         this.tokenService = tokenService;
@@ -27,29 +29,31 @@ public class AuthController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<?> createToken(@RequestBody TokenRequest tokenRequest) {
+    public ResponseWrapper<Map<String, String>> getToken(@RequestBody TokenRequest tokenRequest) {
         Optional<LoginCreds> creds = loginCredsRepository.findByEmailAndClientIdAndClientSecret(
                 tokenRequest.getEmail(),
                 tokenRequest.getClientId(),
                 tokenRequest.getClientSecret()
         );
 
+        response = new HashMap<>();
         if (creds.isEmpty()) {
-            return ResponseEntity.status(401).body("Wrong Login Credentials");
+            response.put("message", GlobalExceptionMsg.UNAUTHORIZED.getExceptionMsg());
+            return ResponseWrapper.unauthorized(response, GlobalExceptionMsg.WRONG_LOGIN_CREDS.getExceptionMsg());
         }
 
         Optional<String> existingToken = tokenService.getValidToken(tokenRequest.getEmail());
 
-        Map<String, String> response = new HashMap<>();
+        response = new HashMap<>();
         if (existingToken.isPresent()) {
+            response.put("message", GlobalExceptionMsg.TOKEN_RESPONSE.getExceptionMsg());
             response.put("token", existingToken.get());
-            return ResponseEntity.ok(response);
+            return ResponseWrapper.ok(response);
         }
 
         String newToken = tokenService.generateToken(tokenRequest.getEmail());
         response.put("token", newToken);
-        return ResponseEntity.ok(response);
+        return ResponseWrapper.ok(response);
 
     }
-
 }

@@ -20,8 +20,13 @@ public enum GlobalExceptionMsg {
 
     SPIELER_DATEN_BY_UUID_EMPTY("Playerdata Fetch failed: no Playerdata was found with given uuid %s."),
     SPIELER_DATEN_BY_NAME_EMPTY("Playerdata Fetch failed: no Playerdata was found."),
-    SPIELER_DATEN_BY_IP_EMPTY("Playerdata Fetch failed: No Playerdata found with given IP %s.");
+    SPIELER_DATEN_BY_IP_EMPTY("Playerdata Fetch failed: No Playerdata found with given IP %s."),
 
+    TOKEN_RESPONSE("Successfully created a new token."),
+    WRONG_LOGIN_CREDS("The given Login Credentials are incorrect."),
+    UNAUTHORIZED("Unauthorized"),
+
+    TOO_MANY_REQUESTS("Too many requests. Please wait 1 minute");
 
     public final String ExceptionMsg;
 

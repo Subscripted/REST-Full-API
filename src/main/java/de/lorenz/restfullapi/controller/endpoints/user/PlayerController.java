@@ -22,8 +22,7 @@ public class PlayerController {
         if (!datenExists(daten)) {
             return ResponseWrapper.notFound(daten, String.format(GlobalExceptionMsg.SPIELER_DATEN_BY_UUID_EMPTY.getExceptionMsg(), uuid));
         }
-        daten.put("message", GlobalExceptionMsg.PLAYER_DATA_BY_NAME.getExceptionMsg());
-
+        daten.put("message", GlobalExceptionMsg.PLAYER_DATA_BY_UUID.getExceptionMsg());
         return ResponseWrapper.ok(daten, "User Data Send Successfully");
     }
 
@@ -34,7 +33,7 @@ public class PlayerController {
         if (!datenExists(daten)) {
             return ResponseWrapper.notFound(daten, String.format(GlobalExceptionMsg.SPIELER_DATEN_BY_NAME_EMPTY.getExceptionMsg(), name));
         }
-        daten.put("message", "User data fetched by name");
+        daten.put("message", GlobalExceptionMsg.PLAYER_DATA_BY_NAME.getExceptionMsg());
         return ResponseWrapper.ok(daten, "User Data Send Successfully");
     }
 
@@ -42,11 +41,10 @@ public class PlayerController {
     @GetMapping("/ip/{ip}")
     public ResponseWrapper<?> getSpielerdatenByIp(@PathVariable String ip, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         Map<String, Object> daten = spielerdatenService.getDatenByIp(ip);
-
         if (!datenExists(daten)) {
             return ResponseWrapper.notFound(daten, String.format(GlobalExceptionMsg.SPIELER_DATEN_BY_IP_EMPTY.getExceptionMsg(), ip));
         }
-        daten.put("message", "User data fetched by IP");
+        daten.put("message", GlobalExceptionMsg.PLAYER_DATA_BY_IP.getExceptionMsg());
         return ResponseWrapper.ok(daten, "User Data Send Successfully");
     }
 

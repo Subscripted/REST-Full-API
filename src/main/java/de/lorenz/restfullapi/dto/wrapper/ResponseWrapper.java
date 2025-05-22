@@ -15,7 +15,7 @@ public class ResponseWrapper<T> {
     private final String statusCode;
     private final int count;
 
-    private ResponseWrapper(T response, String message, String statusCode) {
+    public ResponseWrapper(T response, String message, String statusCode) {
         this.response = response;
         this.message = message;
         this.statusCode = statusCode;
