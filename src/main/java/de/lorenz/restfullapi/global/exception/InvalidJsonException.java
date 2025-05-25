@@ -7,7 +7,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.StandardException;
 
 @StandardException
-@RequiredArgsConstructor
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvalidJsonException extends Exception {

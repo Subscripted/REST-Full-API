@@ -93,4 +93,21 @@ public abstract class JsonElement {
     private IllegalStateException unsupportedCast(String expected) {
         return new IllegalStateException("Expected " + expected + " but was: " + getClass().getSimpleName());
     }
+
+    public JsonElement getByPath(JsonElement element, String path) {
+        String[] keys = path.split("\\.");
+        JsonElement current = element;
+
+        for (String key : keys) {
+            if (!current.isJsonObject()) {
+                throw new IllegalArgumentException("Pfadteil '" + key + "' trifft auf kein Objekt.");
+            }
+            current = current.getAsJsonObject().get(key);
+            if (current == null) {
+                throw new IllegalArgumentException("Schlüssel '" + key + "' existiert nicht.");
+            }
+        }
+
+        return current;
+    }
 }

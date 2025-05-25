@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import static lombok.AccessLevel.PRIVATE;
 
 @Getter
-@ToString
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class JsonObject extends JsonElement {
 
