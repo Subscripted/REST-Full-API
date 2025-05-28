@@ -20,5 +20,7 @@ public interface ForumUserRepository extends JpaRepository<ForumUser, Long> {
     void deleteForumUserByUserId(Long userId);
 
     boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
 }
 

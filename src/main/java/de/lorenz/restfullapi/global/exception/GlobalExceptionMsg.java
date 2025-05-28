@@ -13,6 +13,8 @@ public enum GlobalExceptionMsg {
     USER_NO_CREATION_MISSING_CREDENTIALS("User creation failed: missing required user information."),
     USER_NO_CREATION_ALREADY_EXISTS("User creation failed: user already exists."),
     USER_CREATED("User creation successful."),
+    USER_DELETED_SUCCESSFULLY("User successfully deleted."),
+    USER_NOT_FOUND("User not found."),
 
     PLAYER_DATA_BY_NAME("Playerdata Fetched Successfully by Name"),
     PLAYER_DATA_BY_UUID("Playerdata Fetched Successfully by UUID"),

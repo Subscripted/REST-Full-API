@@ -28,9 +28,13 @@ public class UserController {
     private Map<String, Object> json;
 
     @DeleteMapping("/deleteUser/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+    public ResponseWrapper<?> deleteUser(@PathVariable Long userId) {
         forumUserDataService.deleteSingleByUserId(userId);
-        return ResponseEntity.ok("User deleted successfully");
+
+        json = new HashMap<>();
+        json.put("message", GlobalExceptionMsg.USER_DELETED_SUCCESSFULLY.getExceptionMsg());
+
+        return ResponseWrapper.ok(json);
     }
 
     @PostMapping("/create")
@@ -61,12 +65,20 @@ public class UserController {
 
 
         if (repository.existsByEmail(user.getEmail())) {
-
             json = new HashMap<>();
             json.put("message", GlobalExceptionMsg.USER_NO_CREATION_ALREADY_EXISTS.getExceptionMsg());
             json.put("email", user.getEmail());
             return ResponseWrapper.error(json, "User with that email already exists");
         }
+
+
+        if (repository.existsByUsername(user.getUsername())) {
+            json = new HashMap<>();
+            json.put("message", GlobalExceptionMsg.USER_NO_CREATION_ALREADY_EXISTS.getExceptionMsg());
+            json.put("username", user.getUsername());
+            return ResponseWrapper.error(json, "User with that Name already exists");
+        }
+
         if (repository.existsById(user.getUserId())) {
             return ResponseWrapper.badRequest("User ID already exists.");
         }

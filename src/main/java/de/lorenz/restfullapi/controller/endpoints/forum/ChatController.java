@@ -2,30 +2,33 @@ package de.lorenz.restfullapi.controller.endpoints.forum;
 
 import de.lorenz.restfullapi.dto.*;
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
+import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
 import de.lorenz.restfullapi.model.Antrag;
 import de.lorenz.restfullapi.model.ChatMessage;
 import de.lorenz.restfullapi.repository.AntragRepository;
 import de.lorenz.restfullapi.repository.ForumChatMessageRepository;
 import de.lorenz.restfullapi.repository.ForumUserRepository;
 import de.lorenz.restfullapi.service.TokenService;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/entbannungs-antrag")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatController {
 
-    private final ForumChatMessageRepository forumChatMessageRepository;
-    private final AntragRepository antragRepository;
-    private final ForumUserRepository forumUserRepository;
+    final ForumChatMessageRepository forumChatMessageRepository;
+    final AntragRepository antragRepository;
+    final ForumUserRepository forumUserRepository;
 
+    Map<String, Object> json;
     /**
      * @Usage {
      * "userId":Long
@@ -37,11 +40,15 @@ public class ChatController {
      * @see #createChat(CreateAntragRequest, String)
      */
     @PostMapping("/new/chat")
-    public ResponseEntity<?> createChat(@RequestBody CreateAntragRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseWrapper<?> createChat(@RequestBody CreateAntragRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
+        json = new HashMap<>();
         var userOpt = forumUserRepository.findById(request.userId());
+
+
+        json.put("message", GlobalExceptionMsg.USER_NOT_FOUND.getExceptionMsg());
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("{\"error\": \"User nicht gefunden\"}");
+            return ResponseWrapper.error(json, GlobalExceptionMsg.USER_NOT_FOUND.getExceptionMsg());
         }
 
         var user = userOpt.get();
@@ -54,8 +61,10 @@ public class ChatController {
 
         var savedAntrag = antragRepository.save(antrag);
 
-        Map<String, Object> res = Map.of("antragsId", savedAntrag.getAntragsId(), "message", "Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId() + " Erstellt!");
-        return ResponseEntity.ok(ResponseWrapper.ok(res));
+        json = new HashMap<>();
+        json.put("message", "Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId() + " Erstellt!");
+        json.put("antragsId", savedAntrag.getAntragsId());
+        return ResponseWrapper.ok(json);
     }
 
     /**
