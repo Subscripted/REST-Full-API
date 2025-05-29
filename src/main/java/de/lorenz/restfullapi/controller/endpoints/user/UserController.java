@@ -1,5 +1,6 @@
 package de.lorenz.restfullapi.controller.endpoints.user;
 
+import de.lorenz.restfullapi.dto.ForumUserRequestCreate;
 import de.lorenz.restfullapi.dto.ForumUserRequestUpdate;
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
@@ -65,52 +66,49 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseWrapper<Map<String, Object>> createUser(@RequestBody ForumUser user) {
-        user.setUserId(restUtils.generateUserId());
-        if (user.getEmail() == null || user.getEmail().equals("")) {
-            json = new HashMap<>();
+    public ResponseWrapper<Map<String, Object>> createUser(@RequestBody ForumUserRequestCreate user) {
+        json = new HashMap<>();
+
+        if (user.email() == null || user.email().isEmpty()) {
             json.put("message", GlobalExceptionMsg.USER_NO_CREATION_MISSING_CREDENTIALS.getExceptionMsg());
             return ResponseWrapper.badRequest(json, "Email is required");
         }
 
-        if (user.getPassword() == null || user.getPassword().equals("")) {
-            json = new HashMap<>();
+        if (user.password() == null || user.password().isEmpty()) {
             json.put("message", GlobalExceptionMsg.USER_NO_CREATION_MISSING_CREDENTIALS.getExceptionMsg());
             return ResponseWrapper.badRequest(json, "Password is required");
         }
 
-        if (user.getUsername() == null || user.getUsername().equals("")) {
-            json = new HashMap<>();
+        if (user.username() == null || user.username().isEmpty()) {
             json.put("message", GlobalExceptionMsg.USER_NO_CREATION_MISSING_CREDENTIALS.getExceptionMsg());
-
             return ResponseWrapper.badRequest(json, "Username is required");
         }
 
-        if (repository.existsByEmail(user.getEmail())) {
-            json = new HashMap<>();
+        if (repository.existsByEmail(user.email())) {
             json.put("message", GlobalExceptionMsg.USER_NO_CREATION_ALREADY_EXISTS.getExceptionMsg());
-            json.put("email", user.getEmail());
+            json.put("email", user.email());
             return ResponseWrapper.error(json, "User with that email already exists");
         }
 
-
-        if (repository.existsByUsername(user.getUsername())) {
-            json = new HashMap<>();
+        if (repository.existsByUsername(user.username())) {
             json.put("message", GlobalExceptionMsg.USER_NO_CREATION_ALREADY_EXISTS.getExceptionMsg());
-            json.put("username", user.getUsername());
+            json.put("username", user.username());
             return ResponseWrapper.error(json, "User with that Name already exists");
         }
 
-        if (repository.existsById(user.getUserId())) {
-            return ResponseWrapper.badRequest("User ID already exists.");
-        }
-        forumUserDataService.createUser(user);
+        ForumUser newUser = new ForumUser();
+        newUser.setUsername(user.username());
+        newUser.setUserId(restUtils.generateUserId());
+        newUser.setEmail(user.email());
+        newUser.setPassword(user.password());
+        newUser.setRank(user.rank());
 
-        json = new HashMap<>();
+        forumUserDataService.createUser(newUser); // `@PrePersist` wird jetzt korrekt ausgeführt
+
         json.put("message", GlobalExceptionMsg.USER_CREATED.getExceptionMsg());
-        json.put("userId", user.getUserId());
+        json.put("userId", newUser.getUserId());
 
-        return ResponseWrapper.ok(json, "User with ID (" + user.getUserId() + ") created successfully");
+        return ResponseWrapper.ok(json, "User with ID (" + newUser.getUserId() + ") created successfully");
     }
 
     /** Kleine Methode zum Herumtesten von POST werten
