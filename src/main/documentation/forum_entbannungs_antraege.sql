@@ -9,5 +9,7 @@ create table forum_entbannungs_antraege
     constraint FKg4kqcb42il5hk85cnw0p2gqsj
         foreign key (teamler_id) references forum_user (user_id),
     constraint FKrcei3707ghfncngmj0mno1owc
-        foreign key (user_id) references forum_user (user_id)
+        foreign key (user_id) references forum_user (user_id),
+    insert_date  datetime     not null,
+    last_updated datetime     not null
 );

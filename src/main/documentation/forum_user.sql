@@ -6,5 +6,7 @@ create table forum_user
     rank          varchar(255) null,
     user_id       bigint not null
         primary key,
-    creation_date datetime null
+    creation_date datetime null,
+    insert_date  datetime     not null,
+    last_updated datetime     not null
 );
