@@ -1,5 +1,6 @@
 package de.lorenz.restfullapi.controller.endpoints.user;
 
+import de.lorenz.restfullapi.dto.ForumUserRequestUpdate;
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
 import de.lorenz.restfullapi.model.ForumUser;
@@ -37,12 +38,35 @@ public class UserController {
         return ResponseWrapper.ok(json);
     }
 
+    @PutMapping("/update/{userId}")
+    public ResponseWrapper<?> updateUser(@PathVariable Long userId, @RequestBody ForumUserRequestUpdate request) {
+        ForumUser existingUser = repository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.username() != null) {
+            existingUser.setUsername(request.username());
+        }
+        if (request.email() != null && !request.email().equals(existingUser.getEmail())) {
+            if (repository.existsByEmail(request.email())) {
+                return ResponseWrapper.error("E-Mail bereits vergeben");
+            }
+            existingUser.setEmail(request.email());
+        }
+        if (request.password() != null) {
+            existingUser.setPassword(request.password());
+        }
+        if (request.rank() != null) {
+            existingUser.setRank(request.rank());
+        }
+
+        repository.save(existingUser);
+
+        return ResponseWrapper.ok(Map.of("message", "User updated", "userId", userId));
+    }
+
     @PostMapping("/create")
     public ResponseWrapper<Map<String, Object>> createUser(@RequestBody ForumUser user) {
         user.setUserId(restUtils.generateUserId());
-        //todo: Späteres Problem was auftreten könnte, das die LocalDatetime eine Stunde zurückliegt, Filter für Zeitzonen entwicklen
-        user.setCreation_date(LocalDateTime.now());
-
         if (user.getEmail() == null || user.getEmail().equals("")) {
             json = new HashMap<>();
             json.put("message", GlobalExceptionMsg.USER_NO_CREATION_MISSING_CREDENTIALS.getExceptionMsg());
@@ -61,8 +85,6 @@ public class UserController {
 
             return ResponseWrapper.badRequest(json, "Username is required");
         }
-
-
 
         if (repository.existsByEmail(user.getEmail())) {
             json = new HashMap<>();

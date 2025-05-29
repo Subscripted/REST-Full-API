@@ -58,6 +58,8 @@ public class ChatController {
         antrag.setStatus(false);
         antrag.setTitle("Entbannungsantrag - " + antrag.getUser().getUsername() + " " + antrag.getAntragsId());
         antrag.setAntragsId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        antrag.setInsertDate(LocalDateTime.now());
+        antrag.setLastUpoated(LocalDateTime.now());
 
         var savedAntrag = antragRepository.save(antrag);
 
@@ -236,7 +238,9 @@ public class ChatController {
                         a.getUser() != null ? a.getUser().getUserId() : null,
                         a.getUser() != null && a.getUser().getUsername() != null ? a.getUser().getUsername() : "Unbekannt",
                         a.getTeamler() != null ? a.getTeamler().getUserId() : null,
-                        a.getTitle() != null ? a.getTitle() : ""
+                        a.getTitle() != null ? a.getTitle() : "",
+                        a.getInsertDate(),
+                        a.getLastUpoated()
                 )).toList();
         return ResponseEntity.ok(result);
     }

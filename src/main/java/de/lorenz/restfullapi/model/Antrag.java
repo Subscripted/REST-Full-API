@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Setter
 @Getter
 @Entity
@@ -28,4 +31,22 @@ public class Antrag {
     @Column(name = "antrag_title")
     private String title;
 
+    @Column(name = "insert_date")
+    private LocalDateTime insertDate;
+
+    @Column(name = "last_updated")
+    private LocalDateTime lastUpdated;
+
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.insertDate = now;
+        this.lastUpdated = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.lastUpdated = LocalDateTime.now();
+    }
 }

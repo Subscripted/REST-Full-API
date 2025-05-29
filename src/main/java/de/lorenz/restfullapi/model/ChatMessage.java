@@ -1,8 +1,10 @@
 package de.lorenz.restfullapi.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
@@ -10,26 +12,45 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "forum_entbannungs_antraege_chat")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chat_id")
-    private Long chatId;
+    Long chatId;
 
     @ManyToOne
     @JoinColumn(name = "antrags_id")
-    private Antrag antrag;
+    Antrag antrag;
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private ForumUser sender;
+    ForumUser sender;
 
     @Column(name = "message_id")
-    private Long messageId;
+    Long messageId;
 
-    private String message;
-    private LocalDateTime time;
-    private Boolean reported;
+    String message;
+    LocalDateTime time;
+    Boolean reported;
 
+    @Column(name = "insert_date")
+    LocalDateTime insertDate;
+    @Column(name = "last_updated")
+    LocalDateTime lastUpdated;
+
+
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.insertDate = now;
+        this.lastUpdated = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.lastUpdated = LocalDateTime.now();
+    }
 }

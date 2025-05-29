@@ -1,34 +1,51 @@
 package de.lorenz.restfullapi.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "logincreds")
-@AllArgsConstructor
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class LoginCreds {
 
     @Getter
     @Setter
     @Id
     @Column(name = "email", nullable = false)
-    private String email;
+    String email;
 
     @Getter
     @Setter
     @Column(name = "client_id", nullable = false)
-    private String clientId;
+    String clientId;
 
     @Getter
     @Setter
     @Column(name = "client_secret", nullable = false)
-    private String clientSecret;
+    String clientSecret;
 
-    public LoginCreds() {
+    @Column(name = "insert_date")
+    LocalDateTime insertDate;
+    @Column(name = "last_updated")
+    LocalDateTime lastUpdated;
+
+
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.insertDate = now;
+        this.lastUpdated = now;
     }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+
 }
