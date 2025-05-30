@@ -1,9 +1,8 @@
-package de.lorenz.restfullapi.dto;
+package de.lorenz.restfullapi.dto.get;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
-public record AntragOverview(
+public record AntraegeRequestGet(
         Long antragsId,
         Long userId,
         String username,

@@ -22,5 +22,6 @@ public interface ForumUserRepository extends JpaRepository<ForumUser, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
+
 }
 

@@ -1,5 +1,6 @@
 package de.lorenz.restfullapi.global.exception;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,6 +33,18 @@ public class GlobalExceptionHandler {
         response.put("path", request.getRequestURI());
 
         return ResponseEntity.status(403).body(response);
+    }
+
+
+    @ExceptionHandler(UnrecognizedPropertyException.class)
+    public ResponseEntity<?> handleUnknownJsonFields(UnrecognizedPropertyException ex) {
+        String field = ex.getPropertyName();
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of(
+                        "message", "Unbekanntes Feld im Request: '" + field + "'",
+                        "hint", "Bitte überprüfe die JSON-Schlüssel"
+                ));
     }
 }
 

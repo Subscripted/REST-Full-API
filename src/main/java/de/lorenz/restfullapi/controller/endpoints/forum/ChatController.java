@@ -1,6 +1,9 @@
 package de.lorenz.restfullapi.controller.endpoints.forum;
 
 import de.lorenz.restfullapi.dto.*;
+import de.lorenz.restfullapi.dto.get.AntraegeRequestGet;
+import de.lorenz.restfullapi.dto.post.AntragRequestCreate;
+import de.lorenz.restfullapi.dto.post.ChatMessageRequestCreate;
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
 import de.lorenz.restfullapi.model.Antrag;
@@ -8,7 +11,6 @@ import de.lorenz.restfullapi.model.ChatMessage;
 import de.lorenz.restfullapi.repository.AntragRepository;
 import de.lorenz.restfullapi.repository.ForumChatMessageRepository;
 import de.lorenz.restfullapi.repository.ForumUserRepository;
-import de.lorenz.restfullapi.service.TokenService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -37,10 +39,10 @@ public class ChatController {
      * @Response Antwort:
      * - antragsId (Long)
      * - message (String)
-     * @see #createChat(CreateAntragRequest, String)
+     * @see #createChat(AntragRequestCreate, String)
      */
     @PostMapping("/new/chat")
-    public ResponseWrapper<?> createChat(@RequestBody CreateAntragRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseWrapper<?> createChat(@RequestBody AntragRequestCreate request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         json = new HashMap<>();
         var userOpt = forumUserRepository.findById(request.userId());
@@ -88,10 +90,10 @@ public class ChatController {
      * - username (String)
      * - rank (String)
      * - time (DateTime)
-     * @see #sendMessage(Long, CreateChatMessageRequest, String)
+     * @see #sendMessage(Long, ChatMessageRequestCreate, String)
      */
     @PostMapping("/chat/{antragsId}")
-    public ResponseEntity<?> sendMessage(@PathVariable Long antragsId, @RequestBody CreateChatMessageRequest request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseEntity<?> sendMessage(@PathVariable Long antragsId, @RequestBody ChatMessageRequestCreate request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         var antragOpt = antragRepository.findById(antragsId);
         if (antragOpt.isEmpty()) {
             return ResponseEntity.status(404).body("{\"error\": \"Antrag nicht gefunden\"}");
@@ -230,16 +232,25 @@ public class ChatController {
 
     @GetMapping("/antraege")
     public ResponseEntity<?> getAllAntraege(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        List<AntragOverview> result = antragRepository.findAll().stream()
-                .map(a -> new AntragOverview(
-                        a.getAntragsId(),
-                        a.getUser() != null ? a.getUser().getUserId() : null,
-                        a.getUser() != null && a.getUser().getUsername() != null ? a.getUser().getUsername() : "Unbekannt",
-                        a.getTeamler() != null ? a.getTeamler().getUserId() : null,
-                        a.getTitle() != null ? a.getTitle() : "",
-                        a.getInsertDate(),
-                        a.getLastUpdated()
-                )).toList();
+        List<AntraegeRequestGet> result = antragRepository.findAll().stream()
+                .map(a -> {
+                    Long userId = a.getUser() != null ? a.getUser().getUserId() : null;
+                    String username = a.getUser() != null && a.getUser().getUsername() != null ? a.getUser().getUsername() : "Unbekannt";
+                    Long teamlerId = a.getTeamler() != null ? a.getTeamler().getUserId() : null;
+                    String title = a.getTitle() != null ? a.getTitle() : "";
+
+                    return new AntraegeRequestGet(
+                            a.getAntragsId(),
+                            userId,
+                            username,
+                            teamlerId,
+                            title,
+                            a.getInsertDate(),
+                            a.getLastUpdated()
+                    );
+                })
+                .toList();
+
         return ResponseEntity.ok(result);
     }
 

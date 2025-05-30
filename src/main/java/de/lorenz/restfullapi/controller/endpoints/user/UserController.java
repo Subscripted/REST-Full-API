@@ -1,7 +1,8 @@
 package de.lorenz.restfullapi.controller.endpoints.user;
 
-import de.lorenz.restfullapi.dto.ForumUserRequestCreate;
-import de.lorenz.restfullapi.dto.ForumUserRequestUpdate;
+import de.lorenz.restfullapi.dto.post.ForumUserRequestCreate;
+import de.lorenz.restfullapi.dto.put.ForumUserRequestUpdate;
+import de.lorenz.restfullapi.dto.put.ForumUserUpdateResponse;
 import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import de.lorenz.restfullapi.global.exception.GlobalExceptionMsg;
 import de.lorenz.restfullapi.model.ForumUser;
@@ -9,15 +10,11 @@ import de.lorenz.restfullapi.repository.ForumUserRepository;
 import de.lorenz.restfullapi.service.ForumUserDataService;
 import de.lorenz.restfullapi.utils.RestUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-
+//todo Else-Blöcke einbauen
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/user")
@@ -44,25 +41,35 @@ public class UserController {
         ForumUser existingUser = repository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (request.username() != null) {
+
+        Map<String, Object> changedFields = new HashMap<>();
+        if (request.username() != null ) {
             existingUser.setUsername(request.username());
+            changedFields.put("username", request.username());
         }
+
         if (request.email() != null && !request.email().equals(existingUser.getEmail())) {
             if (repository.existsByEmail(request.email())) {
-                return ResponseWrapper.error("E-Mail bereits vergeben");
+                return ResponseWrapper.error("E-Mail already in use");
             }
             existingUser.setEmail(request.email());
+            changedFields.put("email", existingUser.getEmail());
         }
         if (request.password() != null) {
             existingUser.setPassword(request.password());
+            changedFields.put("password", request.password());
         }
         if (request.rank() != null) {
             existingUser.setRank(request.rank());
+            changedFields.put("rank", existingUser.getRank());
         }
 
-        repository.save(existingUser);
+        forumUserDataService.saveForumUser(existingUser);
 
-        return ResponseWrapper.ok(Map.of("message", "User updated", "userId", userId));
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "User Updated Successfully");
+        response.put("changedFields", new ForumUserUpdateResponse(userId, changedFields));
+        return ResponseWrapper.ok(response);
     }
 
     @PostMapping("/create")
@@ -103,29 +110,12 @@ public class UserController {
         newUser.setPassword(user.password());
         newUser.setRank(user.rank());
 
-        forumUserDataService.createUser(newUser); // `@PrePersist` wird jetzt korrekt ausgeführt
+        forumUserDataService.createUser(newUser);
 
         json.put("message", GlobalExceptionMsg.USER_CREATED.getExceptionMsg());
         json.put("userId", newUser.getUserId());
 
         return ResponseWrapper.ok(json, "User with ID (" + newUser.getUserId() + ") created successfully");
     }
-
-    /** Kleine Methode zum Herumtesten von POST werten
-     *
-     @PostMapping("/set/{name}/{uuid}") public ResponseEntity<?> setName(@PathVariable String name,
-     @PathVariable String uuid,
-     @RequestHeader(value = "Authorization", required = false) String authHeader) {
-     if (!isAuthorized(authHeader)) {
-     return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
-     }
-
-     boolean success = spielerdatenService.updateNameByUuid(uuid, name);
-     if (success) {
-     return ResponseEntity.ok("{\"success\": \"Name geändert\"}");
-     } else {
-     return ResponseEntity.status(404).body("{\"error\": \"Benutzer nicht gefunden\"}");
-     }
-     }
-     */
 }
+

@@ -51,4 +51,8 @@ public class ForumUserDataService {
         repository.save(forumUser);
     }
 
+    public void saveForumUser(ForumUser forumUser) {
+        repository.save(forumUser);
+    }
+
 }
