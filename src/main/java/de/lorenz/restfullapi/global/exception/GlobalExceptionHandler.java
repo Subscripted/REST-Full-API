@@ -1,13 +1,18 @@
 package de.lorenz.restfullapi.global.exception;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import de.lorenz.restfullapi.dto.wrapper.ResponseWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -36,15 +41,19 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(UnrecognizedPropertyException.class)
-    public ResponseEntity<?> handleUnknownJsonFields(UnrecognizedPropertyException ex) {
-        String field = ex.getPropertyName();
-        return ResponseEntity
-                .badRequest()
-                .body(Map.of(
-                        "message", "Unbekanntes Feld im Request: '" + field + "'",
-                        "hint", "Bitte überprüfe die JSON-Schlüssel"
-                ));
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseWrapper<?> handleJsonErrors(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        Throwable cause = ex.getCause();
+        Map<String, Object> response = new HashMap<>();
+        if (cause instanceof UnrecognizedPropertyException unrecognized) {
+            String field = unrecognized.getPropertyName();
+            response.put("path", request.getRequestURI());
+            response.put("hint", "This Field is not Allowed or Incorrect: " + field);
+
+            return ResponseWrapper.badRequest(response, "Something went Wrong");
+        }
+        response.put("error", "Wrong JSON-Body:");
+        return ResponseWrapper.badRequest(response, "Something went Wrong");
     }
 }
 

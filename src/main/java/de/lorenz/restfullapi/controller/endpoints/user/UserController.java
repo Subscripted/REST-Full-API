@@ -10,11 +10,18 @@ import de.lorenz.restfullapi.repository.ForumUserRepository;
 import de.lorenz.restfullapi.service.ForumUserDataService;
 import de.lorenz.restfullapi.utils.RestUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.RecordComponent;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 //todo Else-Blöcke einbauen
+//todo: Wenn z.B. beim erstellen ein Feld wie rank leer gelassen wird kommt noch eine fehlermeldung die aber nicht genügend darüber aussagt
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/user")
@@ -43,7 +50,7 @@ public class UserController {
 
 
         Map<String, Object> changedFields = new HashMap<>();
-        if (request.username() != null ) {
+        if (request.username() != null) {
             existingUser.setUsername(request.username());
             changedFields.put("username", request.username());
         }
@@ -116,6 +123,11 @@ public class UserController {
         json.put("userId", newUser.getUserId());
 
         return ResponseWrapper.ok(json, "User with ID (" + newUser.getUserId() + ") created successfully");
+    }
+    public static Set<String> getAllowedFields(Class<?> recordClass) {
+        return Arrays.stream(recordClass.getRecordComponents())
+                .map(RecordComponent::getName)
+                .collect(Collectors.toSet());
     }
 }
 

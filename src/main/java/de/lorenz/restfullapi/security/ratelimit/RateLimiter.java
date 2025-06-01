@@ -37,7 +37,7 @@ public class RateLimiter extends OncePerRequestFilter {
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
-            response.setStatus(429);
+            response.setStatus(GlobalHttpStatusCode.TO_MANY_REQUESTS.getCode());
             response.setContentType("application/json");
 
             Map<String, Object> innerResponse = new HashMap<>();

@@ -1,30 +1,8 @@
 package de.lorenz.restfullapi.dto.wrapper;
 
 import de.lorenz.restfullapi.global.exception.GlobalHttpStatusCode;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-import java.util.Collection;
-
-@Getter
-public class ResponseWrapper<T> {
-
-    private final T response;
-    private final String message;
-    private final String statusCode;
-    private final int count;
-
-    public ResponseWrapper(T response, String message, String statusCode) {
-        this.response = response;
-        this.message = message;
-        this.statusCode = statusCode;
-        if (response instanceof Collection<?>) {
-            this.count = ((Collection<?>) response).size();
-        } else {
-            this.count = response != null ? 1 : 0;
-        }
-    }
+public record ResponseWrapper<T>(T response, String message, int statusCode) {
 
     public static <T> ResponseWrapper<T> ok(T data) {
         return new ResponseWrapper<>(data, "OK", GlobalHttpStatusCode.OK.getCode());

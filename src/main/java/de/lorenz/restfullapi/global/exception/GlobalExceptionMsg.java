@@ -28,7 +28,8 @@ public enum GlobalExceptionMsg {
     WRONG_LOGIN_CREDS("The given Login Credentials are incorrect."),
     UNAUTHORIZED("Unauthorized"),
 
-    TOO_MANY_REQUESTS("Too many requests. Please wait 1 minute");
+    TOO_MANY_REQUESTS("Too many requests. Please wait 1 minute"),
+    FIELD_DOSENT_EXISTS("Field %s dosen´t exists");
 
     public final String ExceptionMsg;
 
